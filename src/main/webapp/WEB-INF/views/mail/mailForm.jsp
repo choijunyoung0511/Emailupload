@@ -4,40 +4,16 @@
     <title>메일 발송</title>
     <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-
-        label {
-            display: block;
-            margin-top: 20px;
-        }
-
-        input, textarea {
-            width: 400px;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        label { display: block; margin-top: 20px; }
+        input, textarea { width: 400px; padding: 8px; box-sizing: border-box; }
         button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            background-color: #1976d2;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            margin-top: 20px; padding: 10px 20px;
+            background-color: #1976d2; color: white;
+            border: none; border-radius: 4px; cursor: pointer;
         }
-
-        button:hover {
-            background-color: #125ea3;
-        }
-
-        #result {
-            margin-top: 30px;
-            font-weight: bold;
-        }
+        button:hover { background-color: #125ea3; }
+        #result { margin-top: 30px; font-weight: bold; }
     </style>
     <script>
         $(document).ready(function () {
@@ -53,25 +29,26 @@
 
                 $.ajax({
                     type: "POST",
-                    url: "/mail/sendMail",
-                    data: {
-                        toMail: toMail,
-                        title: title,
-                        contents: contents
+                    url: "/mail/sendMail",   // 실제 메일 발송 컨트롤러
+                    data: { toMail: toMail, title: title, contents: contents },
+                    success: function (res) {
+                        if (res === "success") {
+                            alert("메일이 정상적으로 발송되었습니다.");
+                            location.href = "/mail/mailList";
+                        } else {
+                            alert("메일 발송 실패: " + res);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("서버 오류 발생: " + error);
                     }
-                }).then(
-                    function(json) {
-                        alert(json.msg);
-                    }
-                )
+                });
             });
         });
     </script>
 </head>
 <body>
-
 <h2>메일 발송</h2>
-
 <label for="toMail">받는 사람 이메일</label>
 <input type="email" id="toMail" name="toMail" placeholder="example@domain.com" />
 
@@ -82,8 +59,6 @@
 <textarea id="contents" name="contents" rows="8" placeholder="내용 입력"></textarea>
 
 <button id="sendBtn">메일 발송</button>
-
 <div id="result"></div>
-
 </body>
 </html>

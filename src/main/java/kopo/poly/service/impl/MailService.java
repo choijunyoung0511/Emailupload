@@ -2,6 +2,8 @@ package kopo.poly.service.impl;
 
 import jakarta.mail.internet.MimeMessage;
 import kopo.poly.dto.MailDTO;
+import kopo.poly.dto.MailInfoDTO;
+import kopo.poly.service.IMailInfoService;
 import kopo.poly.service.IMailService;
 import kopo.poly.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MailService implements IMailService {
     private final JavaMailSender mailSender;
+    private final IMailInfoService mailInfoService;
     @Value("${spring.mail.username}")
     private String fromMail;
 
@@ -29,21 +32,27 @@ public class MailService implements IMailService {
         }
 
         String toMail = CmmUtil.nvl(pDTO.getToMail());
-        String tittle = CmmUtil.nvl(pDTO.getTitle());
+        String title = CmmUtil.nvl(pDTO.getTitle());
         String contents = CmmUtil.nvl(pDTO.getContents());
 
-        log.info("toMail : {} / tittle : {} / contents : {}", toMail, tittle, contents);
+        log.info("toMail : {} / tittle : {} / contents : {}", toMail, title, contents);
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper messageHelper = new MimeMessageHelper(message,"UTF-8");
 
         try{
             messageHelper.setTo(toMail);
             messageHelper.setFrom(fromMail);
-            messageHelper.setSubject(tittle);
+            messageHelper.setSubject(title);
             messageHelper.setText(contents);
 
             mailSender.send(message);
 
+            MailInfoDTO mailDTO = new MailInfoDTO();
+            mailDTO.setContent(contents);
+            mailDTO.setTitle(title);
+            mailDTO.setSender(fromMail);
+            mailDTO.setReceiver(toMail);
+            mailInfoService.insertMailInfo(mailDTO);
         } catch (Exception e) {
             res = 0;
             log.info("[ERROR] doSendMail : {}",e);
